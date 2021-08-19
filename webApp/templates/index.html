@@ -1,0 +1,241 @@
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script type="text/javascript">
+    function lv_init() {
+    var socket = io.connect('http://'+document.domain+':'+location.port);
+    socket.on('connect', function(msg) {
+      socket.emit('my event', {data: 'client connected!'});
+    });
+    socket.on('rsp', function(msg) {
+      console.log(msg);
+    });
+    
+    socket.on('message', function(msg) {
+      //console.log(msg.data);
+      // Plot the data using D3.js (aka Plotly)
+      var trace1 = {
+				mode: 'lines',
+				name: 'Distance (mm) ',
+				line: {color: 'peru'},
+        fill: "toself",
+        fillcolor: 'peru',
+				type: 'scatterpolar'
+      };
+      var obj = JSON.parse(msg.data);
+      trace1.r = Object.values(obj);
+      trace1.theta = Object.keys(obj);
+      var layout = {
+				title: 'YDLIDAR Distance Measurements',
+				font: {
+					family: 'Arial, sans-serif;',
+					size: 12,
+					color: '#000'
+				},
+				polar: {
+					angularaxis: {
+						visible: true,
+						rotation: 0,
+						direction: 'clockwise'
+					}
+				},
+				showlegend: true,
+      };
+      // Make sure it's a new plot with each measurement!
+      Plotly.newPlot('chart',[trace1],layout,{showSendToCloud:true});
+      // Update the data rate
+      document.getElementById('rate').innerHTML = msg.time;
+    });
+  }  
+  function myFunctionStart(){
+    var socket = io.connect('http://'+document.domain+':'+location.port);
+    socket.on('connect', function(msg) {
+      socket.emit('state button', {data: 'Start'});
+    });
+    socket.on('rsp', function(msg) {
+      console.log(msg);
+    });
+  }
+  function myFunctionStop(){
+    var socket = io.connect('http://'+document.domain+':'+location.port);
+    socket.on('connect', function(msg) {
+      socket.emit('state button', {data: 'Stop'});
+    });
+    socket.on('rsp', function(msg) {
+      console.log(msg);
+    });
+  }
+  function myFunctionExit(){
+    var socket = io.connect('http://'+document.domain+':'+location.port);
+    socket.on('connect', function(msg) {
+      socket.emit('state button', {data: 'Exit'});
+    });
+    socket.on('rsp', function(msg) {
+      console.log(msg);
+    });
+  }
+  </script>
+  <style>
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.button {
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button1 {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #4CAF50;
+}
+
+.button1:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.button2 {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #008CBA;
+}
+
+.button2:hover {
+  background-color: #008CBA;
+  color: white;
+}
+.button3 {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #AF4C50;
+}
+
+.button3:hover {
+  background-color: #AF4C50;
+  color: white;
+}
+</style>
+  <meta charset="UTF-8">
+  <title>Control Robot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="<!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" 
+        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">        
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.1/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.1/addons/p5.dom.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.1/addons/p5.sound.min.js"></script>
+  <script type="text/javascript">
+    /** Whether mouse movements move the joystick */
+    let movable = false;
+    /** The maximum stick deflection angle, in radians */
+    const MAX_DEFLECT = Math.PI / 8;
+
+    /** p5.js */
+    function setup() {
+        createCanvas(400, 400, WEBGL).parent('#canvas');
+    }
+
+    /** p5.js */
+    function draw() {
+        background(6, 0, 163);
+        const stickLen = width * 0.45;
+
+        ambientLight(128);
+        directionalLight(255, 255, 255, 0, 0, -1);  // A white light from behind the viewer
+        ambientMaterial(192);
+
+        sphere(70);
+
+        rotateX(-PI / 2);
+        if (movable) {
+            rotateX(map(mouseYRatio(), -1, 1, -MAX_DEFLECT, MAX_DEFLECT));
+            rotateZ(map(mouseXRatio(), -1, 1, -MAX_DEFLECT, MAX_DEFLECT));
+        }
+        translate(0, -stickLen / 2, 0);
+        noStroke();
+        cylinder(stickLen / 5, stickLen);
+    }
+
+    /** Returns the mouse x position as a number between -1 and 1 */
+    function mouseXRatio() {
+        return mouseRatio(mouseX, width / 2);
+    }
+
+    /** Returns the mouse y position as a number between -1 and 1 */
+    function mouseYRatio() {
+        return -mouseRatio(mouseY, height / 2);
+    }
+
+    /**
+     * Takes the mouse value in pixels, translates it to the center, constrains it to within the canvas dimensions, and
+     * returns the position as a number between -1 and 1.
+     *
+     * @param mouse either mouseX or mouseY
+     * @param half half of either the width or height
+     * @returns the position as a number between -1 and 1
+     */
+    function mouseRatio(mouse, half) {
+        const mouseFromCenter = mouse - half;
+        return constrain(mouseFromCenter, -half, half) / half;
+    }
+
+    /**
+     * Updates the mouse position display on the web page, and allows the joystick to be moved only after the mouse
+     * is moved to the center of the joystick (this prevents the stick from jumping to an extreme position
+     * when the mouse pointer moves in from an edge).
+     */
+    function mouseMoved() {
+        const x = mouseXRatio();
+        const y = mouseYRatio();
+        const activationZone = 0.2;
+
+        if (!movable && dist(x, y, 0, 0) < activationZone) {
+            movable = true;
+            select('#xy').removeClass('invisible');
+        }
+
+        if (movable) {
+            select('#x').html(x.toFixed(3));
+            select('#y').html(y.toFixed(3));
+            var socket = io.connect('http://'+document.domain+':'+location.port);
+            socket.emit('joystickValue', {'x':x.toFixed(3),'y':y.toFixed(3)})
+        }
+    }
+  </script>
+</head>
+<body onload="javascript:lv_init()">
+    <div id="chart"></div>
+<div class="center">
+  Refresh rate (sec):<span id="rate">0.0</span>
+</div>
+<div class="center">
+  <button class="button button1" id="myBtn1" onclick="javascript:myFunctionStart()">Start</button>
+  <button class="button button2" id="myBtn2" onclick="javascript:myFunctionStop()">Stop</button>
+  <button class="button button3" id="myBtn3" onclick="javascript:myFunctionExit()">Exit</button>
+</div>
+<div class="center">
+  <h1>Joystick</h1>
+</div>
+<div class="center">
+  <div onload="container">
+      <div id="canvas"></div>
+      <div id="xy" class="row invisible">
+          <div class="col-2">X: <span id="x">0</span></div>
+          <div class="col-2">Y: <span id="y">0</span></div>
+      </div>
+    </div>
+</div>
+</body>
+</html>

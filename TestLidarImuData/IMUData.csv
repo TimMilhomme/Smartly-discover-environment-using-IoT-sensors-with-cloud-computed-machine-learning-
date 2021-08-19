@@ -1,0 +1,4 @@
+field.header.stamp,field.orientation.x,field.orientation.y,field.orientation.z,field.orientation.w,field.angular_velocity.x,field.angular_velocity.y,field.angular_velocity.z,field.linear_acceleration.x,field.linear_acceleration.y,field.linear_acceleration.z
+timeNow,magne_data[0],magne_data[1],magne_data[2],1,gyro_data[0],gyro_data[1],gyro_data[2],accel_data[0],accel_data[1],accel_data[2]
+timeNow,magne_data[0],magne_data[1],magne_data[2],1,gyro_data[0],gyro_data[1],gyro_data[2],accel_data[0],accel_data[1],accel_data[2]
+timeNow,magne_data[0],magne_data[1],magne_data[2],1,gyro_data[0],gyro_data[1],gyro_data[2],accel_data[0],accel_data[1],accel_data[2]
